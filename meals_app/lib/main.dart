@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import './screens/filters_screen.dart';
 import './screens/tabs_screen.dart';
 import './screens/categories_screem.dart';
 import './screens/category_meals_creen.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         '/': (ctx) => TabsScreen(), // second way to set the home route
         CategoryMealsScreen.routeName: (ctx) => CategoryMealsScreen(),
         MealDetailScreen.routName: (ctx) => MealDetailScreen(),
+        FiltersScreen.routName: (ctx) => FiltersScreen(),
       },
       // use this to decided based on parameters which rout to choose
       onGenerateRoute: (setting) {
