@@ -2,11 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
-class AdapatibeFlatButton extends StatelessWidget {
+class AdaptiveFlatButton extends StatelessWidget {
   final String text;
   final Function handler;
 
-  AdapatibeFlatButton(this.text, this.handler);
+  AdaptiveFlatButton(this.text, this.handler);
 
   @override
   Widget build(BuildContext context) {
