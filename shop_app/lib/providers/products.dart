@@ -67,35 +67,52 @@ class Products with ChangeNotifier {
     return _items.where((productId) => productId.isFavorite).toList();
   }
 
-  Future<void> addProduct(Product product) {
+  Future<void> addProduct(Product product) async {
     Uri url = Uri.parse(
         'https://flutter-playground-9144c-default-rtdb.europe-west1.firebasedatabase.app/products.json');
-    return http
-        .post(
-      url,
-      body: json.encode({
-        'title': product.title,
-        'description': product.description,
-        'imageUrl': product.imageUrl,
-        'price': product.price,
-        'isFavorite': product.isFavorite,
-      }),
-    )
-        .then((response) {
+    // return http
+    try {
+      // using async there is no need of return also there is no need o then and catchError errors and use try catch block
+      final response = await http.post(
+        url,
+        body: json.encode({
+          'title': product.title,
+          'description': product.description,
+          'imageUrl': product.imageUrl,
+          'price': product.price,
+          'isFavorite': product.isFavorite,
+        }),
+      );
       final newProduct = Product(
-          id: json.decode(response.body)['name'],
-          title: product.title,
-          description: product.description,
-          price: product.price,
-          imageUrl: product.imageUrl);
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+        id: json.decode(response.body)['name'],
+      );
       _items.add(newProduct);
-      // _items.insert(0, newProduct); // at the begind of the list
+      // _items.insert(0, newProduct); // at the start of the list
       notifyListeners();
-    }).catchError((error) {
-      print('error from post request: ADD/EDIT product');
+    } catch (error) {
       print(error);
       throw error;
-    });
+    }
+
+    //     .then((response) {
+    // final newProduct = Product(
+    //     id: json.decode(response.body)['name'],
+    //     title: product.title,
+    //     description: product.description,
+    //     price: product.price,
+    //     imageUrl: product.imageUrl);
+    // _items.add(newProduct);
+    // // _items.insert(0, newProduct); // at the begind of the list
+    // notifyListeners();
+    // }).catchError((error) {
+    // print('error from post request: ADD/EDIT product');
+    // print(error);
+    //   throw error;
+    // });
   }
 
   void updateProduct(String id, Product newProduct) {
