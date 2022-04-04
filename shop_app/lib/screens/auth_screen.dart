@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
+import '../models/http_exception.dart';
+
 import '../providers/auth.dart';
 
 enum AuthMode { Signup, Login }
@@ -104,6 +106,23 @@ class _AuthCardState extends State<AuthCard> {
   var _isLoading = false;
   final _passwordController = TextEditingController();
 
+  void _showErrorDialog(String msg) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('An Error occured!'),
+        content: Text(msg),
+        actions: [
+          FlatButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+              child: Text('ok'))
+        ],
+      ),
+    );
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState.validate()) {
       // Invalid!
@@ -113,15 +132,35 @@ class _AuthCardState extends State<AuthCard> {
     setState(() {
       _isLoading = true;
     });
-    if (_authMode == AuthMode.Login) {
-      // Log user in
-      await Provider.of<Auth>(context, listen: false)
-          .logIn(_authData['email'], _authData['password']);
-    } else {
-      // Sign user up
-      await Provider.of<Auth>(context, listen: false)
-          .singUp(_authData['email'], _authData['password']);
+    try {
+      if (_authMode == AuthMode.Login) {
+        // Log user in
+        await Provider.of<Auth>(context, listen: false)
+            .logIn(_authData['email'], _authData['password']);
+      } else {
+        // Sign user up
+        await Provider.of<Auth>(context, listen: false)
+            .singUp(_authData['email'], _authData['password']);
+      }
+    } on HttpException catch (error) {
+      var errorMsg = 'Authenticate failsed';
+      if (error.toString().contains('EMAIL_EXISTS')) {
+        errorMsg = 'This email adres is already in use';
+      } else if (error.toString().contains('INVALID_EMAIL')) {
+        errorMsg = 'This is not a valid email';
+      } else if (error.toString().contains('WEEK_PASSWORD')) {
+        errorMsg = 'This password is too week';
+      } else if (error.toString().contains('EMAIL_NOT_FOUND')) {
+        errorMsg = 'Could not find a user with this email';
+      } else if (error.toString().contains('INVALID_PASSWORD')) {
+        errorMsg = 'Invalid password.';
+      }
+      _showErrorDialog(errorMsg);
+    } catch (error) {
+      const errorMsg = 'Could not authenticate you. Please try again later ';
+      _showErrorDialog(errorMsg);
     }
+
     setState(() {
       _isLoading = false;
     });
