@@ -112,7 +112,7 @@ class _AuthCardState extends State<AuthCard> {
       builder: (ctx) => AlertDialog(
         title: Text('An Error occured!'),
         content: Text(msg),
-        actions: [
+        actions: <Widget>[
           FlatButton(
               onPressed: () {
                 Navigator.of(ctx).pop();
@@ -148,7 +148,7 @@ class _AuthCardState extends State<AuthCard> {
         errorMsg = 'This email adres is already in use';
       } else if (error.toString().contains('INVALID_EMAIL')) {
         errorMsg = 'This is not a valid email';
-      } else if (error.toString().contains('WEEK_PASSWORD')) {
+      } else if (error.toString().contains('WEAK_PASSWORD')) {
         errorMsg = 'This password is too week';
       } else if (error.toString().contains('EMAIL_NOT_FOUND')) {
         errorMsg = 'Could not find a user with this email';
@@ -204,7 +204,6 @@ class _AuthCardState extends State<AuthCard> {
                     if (value.isEmpty || !value.contains('@')) {
                       return 'Invalid email!';
                     }
-                    return null;
                     return null;
                   },
                   onSaved: (value) {
