@@ -44,8 +44,9 @@ class Products with ChangeNotifier {
   // var _showFavoriteOnly = false;
 
   final String authToken;
+  final String userId;
 
-  Products(this.authToken, this._items);
+  Products(this.authToken, this.userId, this._items);
 
   List<Product> get items {
     // if (_showFavoriteOnly) {
@@ -72,9 +73,11 @@ class Products with ChangeNotifier {
     return _items.where((productId) => productId.isFavorite).toList();
   }
 
-  Future<void> fetchAndSetProducts() async {
+  Future<void> fetchAndSetProducts([bool filterByUser = false]) async {
+    final filterString =
+        filterByUser ? 'orderBy="creatorId"&equalTo="${userId}"' : '';
     Uri url = Uri.parse(
-        'https://flutter-playground-9144c-default-rtdb.europe-west1.firebasedatabase.app/products.json?auth=${authToken}');
+        'https://flutter-playground-9144c-default-rtdb.europe-west1.firebasedatabase.app/products.json?auth=${authToken}&${filterString}');
 
     try {
       final response = await http.get(url);
@@ -82,9 +85,13 @@ class Products with ChangeNotifier {
       if (extractedDate == null) {
         return;
       }
+      Uri urlFavorites = Uri.parse(
+          'https://flutter-playground-9144c-default-rtdb.europe-west1.firebasedatabase.app/userFavorites/${userId}.json?auth=${authToken}');
+      final favoriteResponse = await http.get(urlFavorites);
+      final favoriteData = json.decode(favoriteResponse.body);
       final List<Product> loadedProducts = [];
-      print('-----------------%%%%%%%%%%%%%%%%%%%%');
-      print(json.decode(response.body));
+      // print('-----------------%%%%%%%%%%%%%%%%%%%%');
+      // print(json.decode(response.body));
 
       extractedDate.forEach((prodId, prodData) {
         loadedProducts.add(Product(
@@ -92,7 +99,9 @@ class Products with ChangeNotifier {
           title: prodData['title'],
           description: prodData['description'],
           price: prodData['price'],
-          isFavorite: prodData['isFavorite'],
+          //  ?? special way to check if something is null. So if prodId is missing/ not exist and favoriteData[prodId] is null use value after ??
+          isFavorite:
+              favoriteData == null ? false : favoriteData[prodId] ?? false,
           imageUrl: prodData['imageUrl'],
         ));
       });
@@ -117,7 +126,7 @@ class Products with ChangeNotifier {
           'description': product.description,
           'imageUrl': product.imageUrl,
           'price': product.price,
-          'isFavorite': product.isFavorite,
+          'creatorId': userId,
         }),
       );
       final newProduct = Product(
