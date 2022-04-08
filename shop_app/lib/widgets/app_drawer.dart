@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../screens/orders_screen.dart';
 import '../screens/user_products_scree.dart';
 import '../providers/auth.dart';
+import '../helpers/custom_rout.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -28,8 +29,10 @@ class AppDrawer extends StatelessWidget {
               leading: Icon(Icons.shop),
               title: Text('Orders'),
               onTap: () {
-                Navigator.of(context)
-                    .pushReplacementNamed(OrderScreen.routeName);
+                // Navigator.of(context)
+                //     .pushReplacementNamed(OrderScreen.routeName);
+                Navigator.of(context).pushReplacement(
+                    CustomRoute(builder: ((context) => OrderScreen())));
               }),
           Divider(),
           ListTile(
