@@ -106,18 +106,20 @@ class _AuthCardState extends State<AuthCard>
   };
   var _isLoading = false;
   final _passwordController = TextEditingController();
-  // AnimationController _controller;
+  AnimationController _controller;
   // Animation<Size> _heightAnimation;
+  Animation<Offset> _slideAnimation;
+  Animation<double> _opasityAnimation;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
-    // _controller = AnimationController(
-    //   vsync: this,
-    //   duration: Duration(milliseconds: 3000),
-    // );
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 3000),
+    );
 
     // _heightAnimation = Tween<Size>(
     //   begin: Size(double.infinity, 260),
@@ -125,6 +127,13 @@ class _AuthCardState extends State<AuthCard>
     // ).animate(
     //   CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn),
     // );
+    _slideAnimation =
+        Tween<Offset>(begin: Offset(0, -1.5), end: Offset(0, 0)).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn),
+    );
+
+    _opasityAnimation = Tween(begin: 0.0, end: 1.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
     // _heightAnimation.addListener(() => setState(() {}));
   }
@@ -133,7 +142,7 @@ class _AuthCardState extends State<AuthCard>
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    // _controller.dispose();
+    _controller.dispose();
   }
 
   void _showErrorDialog(String msg) {
@@ -201,12 +210,12 @@ class _AuthCardState extends State<AuthCard>
       setState(() {
         _authMode = AuthMode.Signup;
       });
-      // _controller.forward();
+      _controller.forward();
     } else {
       setState(() {
         _authMode = AuthMode.Login;
       });
-      // _controller.reverse();
+      _controller.reverse();
     }
   }
 
@@ -260,20 +269,35 @@ class _AuthCardState extends State<AuthCard>
                     _authData['password'] = value;
                   },
                 ),
-                if (_authMode == AuthMode.Signup)
-                  TextFormField(
-                    enabled: _authMode == AuthMode.Signup,
-                    decoration: InputDecoration(labelText: 'Confirm Password'),
-                    obscureText: true,
-                    validator: _authMode == AuthMode.Signup
-                        ? (value) {
-                            if (value != _passwordController.text) {
-                              return 'Passwords do not match!';
-                            }
-                            return null;
-                          }
-                        : null,
+                // if (_authMode == AuthMode.Signup)
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 3000),
+                  constraints: BoxConstraints(
+                    maxHeight: _authMode == AuthMode.Signup ? 120 : 0,
+                    minHeight: _authMode == AuthMode.Signup ? 60 : 0,
                   ),
+                  curve: Curves.easeIn,
+                  child: FadeTransition(
+                    opacity: _opasityAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: TextFormField(
+                        enabled: _authMode == AuthMode.Signup,
+                        decoration:
+                            InputDecoration(labelText: 'Confirm Password'),
+                        obscureText: true,
+                        validator: _authMode == AuthMode.Signup
+                            ? (value) {
+                                if (value != _passwordController.text) {
+                                  return 'Passwords do not match!';
+                                }
+                                return null;
+                              }
+                            : null,
+                      ),
+                    ),
+                  ),
+                ),
                 SizedBox(
                   height: 20,
                 ),
